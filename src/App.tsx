@@ -1,12 +1,15 @@
-import ShowCard from './components/ShowCard'
-import { shows } from './data/mockData'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AppShell from './components/AppShell'
+import HomePage from './pages/HomePage'
 
 export default function App() {
   return (
-    <div style={{ padding: 24 }}>
-      {shows.map((show) => (
-        <ShowCard key={show.id} show={show} />
-      ))}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<AppShell />}>
+          <Route index element={<HomePage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
