@@ -7,6 +7,7 @@ export const shows: Show[] = [
     niche: 'Gardening',
     host: 'Nigel',
     description: 'Tips for small gardens and balconies',
+    coverColor: '#10B981',
   },
   {
     id: 's2',
@@ -14,6 +15,7 @@ export const shows: Show[] = [
     niche: 'Programming',
     host: 'Maya',
     description: 'Learning web development step by step',
+    coverColor: '#3B82F6',
   },
 ]
 

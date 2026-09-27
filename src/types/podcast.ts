@@ -6,6 +6,7 @@ export type Show = {
   niche: string
   host: string
   description: string
+  coverColor: string
 }
 
 export type Episode = {
