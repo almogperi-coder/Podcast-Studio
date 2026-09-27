@@ -1,66 +1,136 @@
-import { Button, Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import PodcastsIcon from '@mui/icons-material/Podcasts'
+import { Link, useParams } from 'react-router-dom'
 import StatusChip from '../../components/StatusChip'
-import { useParams } from 'react-router-dom'
 import { usePodcastContext } from '../../context/PodcastContext'
 import type { EpisodeStatus } from '../../types/podcast'
 
 const statusOrder: EpisodeStatus[] = ['draft', 'scripted', 'recorded', 'published']
 
 function getNextStatus(status: EpisodeStatus): EpisodeStatus | null {
-    const index = statusOrder.indexOf(status)
-    return statusOrder[index + 1] ?? null
+  const index = statusOrder.indexOf(status)
+  return statusOrder[index + 1] ?? null
 }
 
 export default function ShowPage() {
-    const { shows, episodes, updateEpisodeStatus } = usePodcastContext()
-    const { showId } = useParams()
+  const { shows, episodes, updateEpisodeStatus } = usePodcastContext()
+  const { showId } = useParams()
 
-    const show = shows.find((s) => s.id === showId)
-    const showEpisodes = episodes.filter((e) => e.showId === showId)
+  const show = shows.find((s) => s.id === showId)
+  const showEpisodes = episodes.filter((e) => e.showId === showId)
 
-    if (!show) {
-        return <Typography variant="h5">Show not found</Typography>
-    }
+  if (!show) {
+    return <Typography variant="h5">Show not found</Typography>
+  }
 
-    return (
-        <>
-            <Chip label={show.niche} color="primary" size="small" />
-            <Typography variant="h4" sx={{ mt: 1 }}>
-                {show.title}
-            </Typography>
-            <Typography color="text.secondary" gutterBottom>
-                Hosted by {show.host}
-            </Typography>
+  const publishedCount = showEpisodes.filter((e) => e.status === 'published').length
+  const progress = showEpisodes.length === 0 ? 0 : (publishedCount / showEpisodes.length) * 100
 
-            <Typography variant="h6" sx={{ mt: 3 }}>
-                Episodes ({showEpisodes.length})
-            </Typography>
-            <List>
-                {showEpisodes.map((episode) => {
-                    const nextStatus = getNextStatus(episode.status)
+  return (
+    <>
+      <Button component={Link} to="/" startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
+        All shows
+      </Button>
 
-                    return (
-                        <ListItem key={episode.id} divider>
-                            <ListItemText
-                                primary={episode.title}
-                                secondary={episode.publishDate ?? 'Not published yet'}
-                            />
-                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                <StatusChip status={episode.status} />
-                                {nextStatus && (
-                                    <Button
-                                        size="small"
-                                        variant="contained"
-                                        onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
-                                    >
-                                        → {nextStatus}
-                                    </Button>
-                                )}
-                            </Stack>
-                        </ListItem>
-                    )
-                })}
-            </List>
-        </>
-    )
+      <Box
+        sx={{
+          p: { xs: 3, md: 5 },
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+          background: `linear-gradient(135deg, ${show.coverColor}, #151524 75%)`,
+        }}
+      >
+        <Box
+          sx={{
+            width: 96,
+            height: 96,
+            flexShrink: 0,
+            borderRadius: 2,
+            display: { xs: 'none', sm: 'flex' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(255, 255, 255, 0.15)',
+          }}
+        >
+          <PodcastsIcon sx={{ fontSize: 56 }} />
+        </Box>
+
+        <Box>
+          <Chip
+            label={show.niche}
+            size="small"
+            sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', fontWeight: 600 }}
+          />
+          <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>
+            {show.title}
+          </Typography>
+          <Typography sx={{ opacity: 0.85 }}>
+            Hosted by {show.host} · {show.description}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{ mt: 4 }}>
+        <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="h6">Episodes ({showEpisodes.length})</Typography>
+          <Typography color="text.secondary">
+            {publishedCount} of {showEpisodes.length} published
+          </Typography>
+        </Stack>
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{
+            height: 8,
+            borderRadius: '4px',
+            bgcolor: 'rgba(255, 255, 255, 0.08)',
+            '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: '4px' },
+          }}
+        />
+      </Box>
+
+      <Stack spacing={1.5} sx={{ mt: 3 }}>
+        {showEpisodes.map((episode) => {
+          const nextStatus = getNextStatus(episode.status)
+
+          return (
+            <Paper
+              key={episode.id}
+              variant="outlined"
+              sx={{
+                p: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+              }}
+            >
+              <Box>
+                <Typography sx={{ fontWeight: 600 }}>{episode.title}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {episode.publishDate ?? 'Not published yet'}
+                </Typography>
+              </Box>
+
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <StatusChip status={episode.status} />
+                {nextStatus && (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
+                  >
+                    → {nextStatus}
+                  </Button>
+                )}
+              </Stack>
+            </Paper>
+          )
+        })}
+      </Stack>
+    </>
+  )
 }
