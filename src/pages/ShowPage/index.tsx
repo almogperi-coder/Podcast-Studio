@@ -1,4 +1,5 @@
 import { Button, Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import StatusChip from '../../components/StatusChip'
 import { useParams } from 'react-router-dom'
 import { usePodcastContext } from '../../context/PodcastContext'
 import type { EpisodeStatus } from '../../types/podcast'
@@ -45,7 +46,7 @@ export default function ShowPage() {
                                 secondary={episode.publishDate ?? 'Not published yet'}
                             />
                             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                <Chip label={episode.status} size="small" variant="outlined" />
+                                <StatusChip status={episode.status} />
                                 {nextStatus && (
                                     <Button
                                         size="small"
