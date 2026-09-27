@@ -3,38 +3,47 @@ import { episodes as initialEpisodes, shows as initialShows } from '../data/mock
 import type { Episode, EpisodeStatus, Show } from '../types/podcast'
 
 type PodcastContextValue = {
-  shows: Show[]
-  episodes: Episode[]
-  updateEpisodeStatus: (episodeId: string, status: EpisodeStatus) => void
+    shows: Show[]
+    episodes: Episode[]
+    updateEpisodeStatus: (episodeId: string, status: EpisodeStatus) => void
 }
 
 const PodcastContext = createContext<PodcastContextValue | null>(null)
 
 export function PodcastProvider({ children }: { children: ReactNode }) {
-  const [shows] = useState<Show[]>(initialShows)
-  const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes)
+    const [shows] = useState<Show[]>(initialShows)
+    const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes)
 
-  function updateEpisodeStatus(episodeId: string, status: EpisodeStatus) {
-    setEpisodes((current) =>
-      current.map((episode) =>
-        episode.id === episodeId ? { ...episode, status } : episode
-      )
+    function updateEpisodeStatus(episodeId: string, status: EpisodeStatus) {
+        setEpisodes((current) =>
+            current.map((episode) =>
+                episode.id === episodeId
+                    ? {
+                        ...episode,
+                        status,
+                        publishDate:
+                            status === 'published'
+                                ? new Date().toISOString().slice(0, 10)
+                                : episode.publishDate,
+                    }
+                    : episode
+            )
+        )
+    }
+
+    return (
+        <PodcastContext.Provider value={{ shows, episodes, updateEpisodeStatus }}>
+            {children}
+        </PodcastContext.Provider>
     )
-  }
-
-  return (
-    <PodcastContext.Provider value={{ shows, episodes, updateEpisodeStatus }}>
-      {children}
-    </PodcastContext.Provider>
-  )
 }
 
 export function usePodcastContext() {
-  const context = useContext(PodcastContext)
+    const context = useContext(PodcastContext)
 
-  if (context === null) {
-    throw new Error('usePodcastContext must be used within PodcastProvider')
-  }
+    if (context === null) {
+        throw new Error('usePodcastContext must be used within PodcastProvider')
+    }
 
-  return context
+    return context
 }
