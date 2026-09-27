@@ -1,10 +1,10 @@
 import { Stack, Typography } from '@mui/material'
 import ShowCard from '../../components/ShowCard'
-import { shows } from '../../data/mockData'
+import { usePodcastContext } from '../../context/PodcastContext'
 
 export default function HomePage() {
-  return (
-    <>
+    const { shows } = usePodcastContext() 
+    return <>
       <Typography variant="h4" gutterBottom>
         My Shows
       </Typography>
@@ -14,5 +14,5 @@ export default function HomePage() {
         ))}
       </Stack>
     </>
-  )
+  
 }

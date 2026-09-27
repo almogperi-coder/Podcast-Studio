@@ -1,8 +1,9 @@
 import { Chip, List, ListItem, ListItemText, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { episodes, shows } from '../../data/mockData'
+import { usePodcastContext } from '../../context/PodcastContext'
 
 export default function ShowPage() {
+    const { shows, episodes } = usePodcastContext()
   const { showId } = useParams()
 
   const show = shows.find((s) => s.id === showId)
