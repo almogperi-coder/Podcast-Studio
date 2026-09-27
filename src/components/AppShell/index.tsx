@@ -1,19 +1,40 @@
-import { AppBar, Container, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material'
+import PodcastsIcon from '@mui/icons-material/Podcasts'
 import { Link, Outlet } from 'react-router-dom'
 
 export default function AppShell() {
   return (
     <>
-      <AppBar position="static">
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          bgcolor: 'rgba(11, 11, 20, 0.7)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         <Toolbar>
-          <Typography
-            variant="h6"
+          <Box
             component={Link}
             to="/"
-            sx={{ color: 'inherit', textDecoration: 'none' }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none' }}
           >
-            🎙️ Podcast Studio
-          </Typography>
+            <PodcastsIcon sx={{ color: 'secondary.main' }} />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                background: 'linear-gradient(90deg, #8B5CF6, #EC4899)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              Podcast Studio
+            </Typography>
+          </Box>
         </Toolbar>
       </AppBar>
       <Container sx={{ py: 3 }}>
