@@ -3,6 +3,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PodcastsIcon from '@mui/icons-material/Podcasts'
 import { Link, useParams } from 'react-router-dom'
 import StatusChip from '../../components/StatusChip'
+import AddEpisodeForm from '../../components/AddEpisodeForm'
 import { usePodcastContext } from '../../context/PodcastContext'
 import type { EpisodeStatus } from '../../types/podcast'
 
@@ -131,6 +132,7 @@ export default function ShowPage() {
           )
         })}
       </Stack>
+      <AddEpisodeForm showId={show.id} />
     </>
   )
 }
