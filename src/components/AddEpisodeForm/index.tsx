@@ -12,9 +12,13 @@ export default function AddEpisodeForm(props: AddEpisodeFormProps) {
   const { addEpisode } = usePodcastContext()
   const [title, setTitle] = useState('')
 
+  const trimmedTitle = title.trim()
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    addEpisode(showId, title)
+    if (trimmedTitle === '') return
+
+    addEpisode(showId, trimmedTitle)
     setTitle('')
   }
 
@@ -28,7 +32,7 @@ export default function AddEpisodeForm(props: AddEpisodeFormProps) {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
-        <Button type="submit" variant="contained" startIcon={<AddIcon />} sx={{ flexShrink: 0 }}>
+        <Button type="submit" variant="contained" startIcon={<AddIcon />}disabled={trimmedTitle === ''} sx={{ flexShrink: 0 }}>
           Add episode
         </Button>
       </Stack>
