@@ -6,6 +6,7 @@ type PodcastContextValue = {
     shows: Show[]
     episodes: Episode[]
     updateEpisodeStatus: (episodeId: string, status: EpisodeStatus) => void
+    addEpisode: (showId: string, title: string) => void
 }
 
 const PodcastContext = createContext<PodcastContextValue | null>(null)
@@ -31,8 +32,18 @@ export function PodcastProvider({ children }: { children: ReactNode }) {
         )
     }
 
+    function addEpisode(showId: string, title: string) {
+        const newEpisode: Episode = {
+            id: crypto.randomUUID(),
+            showId,
+            title,
+            status: 'draft',
+        }
+        setEpisodes((current) => [...current, newEpisode])
+    }
+
     return (
-        <PodcastContext.Provider value={{ shows, episodes, updateEpisodeStatus }}>
+        <PodcastContext.Provider value={{ shows, episodes, updateEpisodeStatus, addEpisode }}>
             {children}
         </PodcastContext.Provider>
     )
