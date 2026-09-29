@@ -32,7 +32,7 @@ export default function AddEpisodeForm(props: AddEpisodeFormProps) {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
-        <Button type="submit" variant="contained" startIcon={<AddIcon />}disabled={trimmedTitle === ''} sx={{ flexShrink: 0 }}>
+        <Button type="submit" variant="contained" startIcon={<AddIcon />} disabled={trimmedTitle === ''} sx={{ flexShrink: 0 }}>
           Add episode
         </Button>
       </Stack>
