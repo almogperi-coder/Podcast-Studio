@@ -56,7 +56,7 @@ export default function ShowCard(props: ShowCardProps) {
             {description}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-            {episodeCount} episodes
+            {episodeCount}    {episodeCount === 1 ? 'episode' : 'episodes'}
           </Typography>
         </CardContent>
       </CardActionArea>
