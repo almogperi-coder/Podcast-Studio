@@ -5,14 +5,8 @@ import { Link, useParams } from 'react-router-dom'
 import StatusChip from '../../components/StatusChip'
 import AddEpisodeForm from '../../components/AddEpisodeForm'
 import { usePodcastContext } from '../../context/PodcastContext'
-import type { EpisodeStatus } from '../../types/podcast'
+import { getNextStatus } from '../../utils/status'
 
-const statusOrder: EpisodeStatus[] = ['draft', 'scripted', 'recorded', 'published']
-
-function getNextStatus(status: EpisodeStatus): EpisodeStatus | null {
-  const index = statusOrder.indexOf(status)
-  return statusOrder[index + 1] ?? null
-}
 
 export default function ShowPage() {
   const { shows, episodes, updateEpisodeStatus } = usePodcastContext()
