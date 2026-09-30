@@ -1,6 +1,11 @@
-import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material'
 import PodcastsIcon from '@mui/icons-material/Podcasts'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+
+const navLinkStyle = {
+  color: 'text.secondary',
+  '&.active': { color: 'text.primary', bgcolor: 'rgba(139, 92, 246, 0.15)' },
+}
 
 export default function AppShell() {
   return (
@@ -34,6 +39,15 @@ export default function AppShell() {
             >
               Podcast Studio
             </Typography>
+          </Box>
+
+          <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+            <Button component={NavLink} to="/" end sx={navLinkStyle}>
+              Shows
+            </Button>
+            <Button component={NavLink} to="/pipeline" sx={navLinkStyle}>
+              Pipeline
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>
