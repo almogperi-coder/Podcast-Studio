@@ -23,14 +23,17 @@ src/
   theme.ts                      createTheme: dark mode, palette, borderRadius 16, typography
   types/podcast.ts              EpisodeStatus, Show (incl. coverColor), Episode
   data/mockData.ts              Mock data: 2 shows (each with a coverColor), 4 episodes
-  context/PodcastContext.tsx    State for shows and episodes, updateEpisodeStatus, addEpisode
+  context/PodcastContext.tsx    State for shows and episodes, updateEpisodeStatus, addEpisode; episodes persisted in localStorage
   components/AddEpisodeForm/    Form under the episode list: controlled TextField + submit button, trims and validates the title
-  components/AppShell/          Sticky glass AppBar (blur) + gradient logo + Container + <Outlet />
+  components/AppShell/          Sticky glass AppBar (blur) + gradient logo + Container + <Outlet /> + NavLinks (Shows, Pipeline)
   components/Hero/              Home banner: radial "glow" background, gradient headline, live stats
+  components/PipelineCard/      Board card: show dot + name in its coverColor (links to the show), title, "Move to <next>" button
   components/ShowCard/          Card with gradient cover in the show's coverColor, hover lift + glow, episode count
-  components/StatusChip/        Chip per status (color + icon) from a Record<EpisodeStatus, StatusConfig>
+  components/StatusChip/        Chip per status (color + icon), reads statusConfig from utils/status
   pages/HomePage/               Hero + responsive Grid of ShowCards
   pages/ShowPage/               Back button, show banner, published progress bar, episodes as Paper rows, "Next status" button, AddEpisodeForm
+  pages/PipelinePage/           Kanban: a column per status (colored top border, icon, count), PipelineCards, empty state
+  utils/status.tsx              Single source of truth: statusConfig (label, color, icon), statusOrder, getNextStatus
   App.tsx                       PodcastProvider > BrowserRouter > Routes
   main.tsx                      ThemeProvider > CssBaseline + App
 ```
@@ -38,6 +41,7 @@ src/
 ## Routes
 - `/`: HomePage
 - `/shows/:showId`: ShowPage ("Show not found" if the id doesn't exist)
+- `/pipeline`: PipelinePage
 
 ## Design system
 - Background `#0B0B14`, paper `#151524`
@@ -60,21 +64,33 @@ src/
 - Derived value instead of extra state: `const trimmedTitle = title.trim()`, recalculated every render
 - Early return as a guard: `if (trimmedTitle === '') return`, plus `disabled` on the button for the UX
 - Ternary inside JSX (an expression, not an `if`): `{count === 1 ? 'episode' : 'episodes'}`
+- localStorage: lazy initializer `useState(loadEpisodes)` (runs once) + `useEffect(() => save, [episodes])`; `JSON.parse` in try/catch
+- Reset demo data: in the browser console `localStorage.clear()` then refresh (key: `podcast-studio:episodes`)
+- Refactor to a shared module (`utils/status.tsx`, `.tsx` because it holds JSX); named exports/imports
+- CSS Grid for columns: `gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }`
+- `show?.coverColor ?? '#94A3B8'` (optional chaining + nullish coalescing)
+- `NavLink` adds an `active` class (style with `'&.active'`); `end` on the `/` link so it only matches exactly
 
 ## What's done
-- Status pipeline: draft → scripted → recorded → published (`getNextStatus` in ShowPage)
+- Status pipeline: draft → scripted → recorded → published (`getNextStatus` in `utils/status.tsx`)
 - Moving an episode to `published` sets `publishDate` to today's date
 - Design session (Sep 28, 2026), steps 1 to 6: theme + font, glass AppBar, Hero with live stats, show cards grid, StatusChip, ShowPage redesign
 - Add-episode session (Sep 30, 2026): `addEpisode` in the Context, `AddEpisodeForm` on ShowPage (new episodes start as `draft`), title trimming and validation, "1 episode" pluralization in ShowCard
+- Product vision (Sep 30, 2026): the product is an "AI co-producer" for niche/business podcasts, not another audio generator. Full vision, roadmap (4 phases with gates), feature list and pricing hypothesis live in the Claude doc "Podcast Studio: Product Vision & Roadmap"
+- Sprint 1 of Phase 1 (Sep 30, 2026): episodes persist in localStorage, status config moved to `utils/status.tsx`, Pipeline Board (`/pipeline`) with PipelineCard, nav links in the AppBar
+
+## Next up (Phase 1: live demo)
+- Show DNA: a form for a new show (title, niche, host, description, coverColor, audience, tone); persist shows in localStorage too
+- Deploy to Vercel so the demo has a real URL (gate for Phase 1: live URL + 3 people tried it)
+- Episode Studio: a page per episode (script, notes, checklist)
+- Consistency Streak: weekly goal + publishing calendar
+- Mobile polish: ShowPage episode rows are cramped at phone width (title wraps into many lines)
 
 ## Ideas for next steps
-- Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage), and export `statusConfig` so the "Next status" button can use its label and color
-- Small polish: check the layout on a phone-width window; a blank line before `<AddEpisodeForm />` in ShowPage
-- A form for a new show (title, niche, host, description) with a coverColor picker, reusing the AddEpisodeForm pattern
+- Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage); the ShowPage "→ next" button could use `statusConfig` label and color like PipelineCard does
+- Small polish: a blank line before `<AddEpisodeForm />` in ShowPage
 - Deleting or renaming an episode; an empty state ("No episodes yet") on ShowPage for a show with no episodes
-- Saving to localStorage so data survives a refresh (useEffect)
-- EpisodePage: a page for a single episode
-- Later on: a server, an LLM for writing scripts, TTS, and an RSS feed
+- Later phases (see the vision doc): backend + auth, AI Co-producer (scripts, Topic Radar, Repurpose Pack) via the server only, then Stripe, Public Show Page, Hebrew/English
 
 ## Working with Claude
 - The dev server runs in its own terminal (`npm run dev`, port 5173); git and everything else run in a second terminal
