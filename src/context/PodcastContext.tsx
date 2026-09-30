@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext,useEffect, useState, type ReactNode } from 'react'
 import { episodes as initialEpisodes, shows as initialShows } from '../data/mockData'
 import type { Episode, EpisodeStatus, Show } from '../types/podcast'
 
@@ -11,9 +11,26 @@ type PodcastContextValue = {
 
 const PodcastContext = createContext<PodcastContextValue | null>(null)
 
+const EPISODES_KEY = 'podcast-studio:episodes'
+
+function loadEpisodes(): Episode[] {
+    const saved = localStorage.getItem(EPISODES_KEY)
+    if (saved === null) return initialEpisodes
+
+    try {
+        return JSON.parse(saved) as Episode[]
+    } catch {
+        return initialEpisodes
+    }
+}
+
 export function PodcastProvider({ children }: { children: ReactNode }) {
     const [shows] = useState<Show[]>(initialShows)
-    const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes)
+    const [episodes, setEpisodes] = useState<Episode[]>(loadEpisodes)
+
+    useEffect(() => {
+        localStorage.setItem(EPISODES_KEY, JSON.stringify(episodes))
+    }, [episodes])
 
     function updateEpisodeStatus(episodeId: string, status: EpisodeStatus) {
         setEpisodes((current) =>
