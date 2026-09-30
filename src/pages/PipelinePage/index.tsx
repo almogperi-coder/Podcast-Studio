@@ -1,4 +1,5 @@
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
+import PipelineCard from '../../components/PipelineCard'
 import { usePodcastContext } from '../../context/PodcastContext'
 import { statusConfig, statusOrder } from '../../utils/status'
 
@@ -34,9 +35,7 @@ export default function PipelinePage() {
 
               <Stack spacing={1}>
                 {columnEpisodes.map((episode) => (
-                  <Paper key={episode.id} sx={{ p: 1.5, bgcolor: 'background.default' }}>
-                    {episode.title}
-                  </Paper>
+                  <PipelineCard key={episode.id} episode={episode} />
                 ))}
                 {columnEpisodes.length === 0 && (
                   <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
