@@ -1,9 +1,11 @@
 import { Box, Button, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PodcastsIcon from '@mui/icons-material/Podcasts'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { Link, useParams } from 'react-router-dom'
 import StatusChip from '../../components/StatusChip'
 import AddEpisodeForm from '../../components/AddEpisodeForm'
+import ShowDna from '../../components/ShowDna'
 import { usePodcastContext } from '../../context/PodcastContext'
 import { getNextStatus } from '../../utils/status'
 
@@ -63,10 +65,19 @@ export default function ShowPage() {
             {show.title}
           </Typography>
           <Typography sx={{ opacity: 0.85 }}>
-            Hosted by {show.host} · {show.description}
+          Hosted by {show.host}
+          {show.description && ` · ${show.description}`}
           </Typography>
         </Box>
       </Box>
+
+      <Paper variant="outlined" sx={{ mt: 3, p: { xs: 2, sm: 3 } }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
+          <AutoAwesomeIcon sx={{ color: 'secondary.main' }} />
+          <Typography variant="h6">Show DNA</Typography>
+        </Stack>
+        <ShowDna show={show} />
+      </Paper>
 
       <Box sx={{ mt: 4 }}>
         <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
