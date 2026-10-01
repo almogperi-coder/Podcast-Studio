@@ -21,18 +21,24 @@ The idea is a management app for a "podcast factory": shows, episodes, and a pip
 index.html                      Google Fonts link for Plus Jakarta Sans
 src/
   theme.ts                      createTheme: dark mode, palette, borderRadius 16, typography
-  types/podcast.ts              EpisodeStatus, Show (incl. coverColor), Episode
-  data/mockData.ts              Mock data: 2 shows (each with a coverColor), 4 episodes
-  context/PodcastContext.tsx    State for shows and episodes, updateEpisodeStatus, addEpisode; episodes persisted in localStorage
+  types/podcast.ts              EpisodeStatus, ShowTone, Show (incl. coverColor + DNA: audience, tone, hostPersona), NewShow = Omit<Show, 'id'>, Episode
+  data/mockData.ts              Mock data: 2 shows (each with a coverColor and Show DNA), 4 episodes
+  context/PodcastContext.tsx    State for shows and episodes, updateEpisodeStatus, addEpisode, addShow (returns the new id); shows and episodes persisted in localStorage
   components/AddEpisodeForm/    Form under the episode list: controlled TextField + submit button, trims and validates the title
   components/AppShell/          Sticky glass AppBar (blur) + gradient logo + Container + <Outlet /> + NavLinks (Shows, Pipeline)
+  components/ColorSwatches/     Round color buttons (ButtonBase) for coverColor; controlled (value + onChange), ring + check on the selected one
   components/Hero/              Home banner: radial "glow" background, gradient headline, live stats
   components/PipelineCard/      Board card: show dot + name in its coverColor (links to the show), title, "Move to <next>" button
   components/ShowCard/          Card with gradient cover in the show's coverColor, hover lift + glow, episode count
+  components/ShowDna/           3 tiles (Audience, Tone, Host persona) in the show's color; auto-fit grid; "Not set yet" for empty values
+  components/ShowPreview/       Live preview card next to the new-show form (cover, title, niche, host + ShowDna); sticky on desktop
   components/StatusChip/        Chip per status (color + icon), reads statusConfig from utils/status
-  pages/HomePage/               Hero + responsive Grid of ShowCards
-  pages/ShowPage/               Back button, show banner, published progress bar, episodes as Paper rows, "Next status" button, AddEpisodeForm
+  components/TonePicker/        Clickable Chips per tone (selected = filled primary) + the selected tone's hint
+  pages/HomePage/               Hero + "My Shows" header with a "New show" button + responsive Grid of ShowCards
+  pages/NewShowPage/            /shows/new: Basics + Show DNA form (validation after first submit) + live ShowPreview; saves and navigates to the new show
+  pages/ShowPage/               Back button, show banner, Show DNA panel, published progress bar, episodes as Paper rows, "Next status" button, AddEpisodeForm
   pages/PipelinePage/           Kanban: a column per status (colored top border, icon, count), PipelineCards, empty state
+  utils/showOptions.ts          toneConfig (label, hint), toneOrder, coverColors (8 swatches)
   utils/status.tsx              Single source of truth: statusConfig (label, color, icon), statusOrder, getNextStatus
   App.tsx                       PodcastProvider > BrowserRouter > Routes
   main.tsx                      ThemeProvider > CssBaseline + App
@@ -40,6 +46,7 @@ src/
 
 ## Routes
 - `/`: HomePage
+- `/shows/new`: NewShowPage (a static path wins over `:showId`, so `new` is never read as an id)
 - `/shows/:showId`: ShowPage ("Show not found" if the id doesn't exist)
 - `/pipeline`: PipelinePage
 
@@ -47,6 +54,9 @@ src/
 - Background `#0B0B14`, paper `#151524`
 - Brand gradient: `linear-gradient(90deg, #8B5CF6, #EC4899)` (primary purple, secondary pink)
 - Show colors: Garden Nights `#10B981` (green), Code From Zero `#3B82F6` (blue)
+- Cover color swatches (`utils/showOptions.ts`): `#8B5CF6` `#EC4899` `#EF4444` `#F97316` `#F59E0B` `#10B981` `#06B6D4` `#3B82F6`
+- Tones: Friendly, Expert, Energetic, Calm, Witty
+- "AI" sections use the `AutoAwesome` icon in pink (`secondary.main`) and a soft purple border/glow
 - Status colors: draft `#94A3B8` (EditNote), scripted `#F59E0B` (Description), recorded `#EC4899` (Mic), published `#10B981` (CheckCircle)
 - Tricks learned:
   - Gradient text: gradient `background` + `backgroundClip: 'text'` + `WebkitBackgroundClip: 'text'` + `color: 'transparent'`
@@ -70,6 +80,18 @@ src/
 - CSS Grid for columns: `gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }`
 - `show?.coverColor ?? '#94A3B8'` (optional chaining + nullish coalescing)
 - `NavLink` adds an `active` class (style with `'&.active'`); `end` on the `/` link so it only matches exactly
+- `Omit<Show, 'id'>`: a type without one field (the form has no id yet; the Context creates it)
+- `Record<ShowTone, ToneConfig>` + an order array, same pattern as `statusConfig` (TS errors if a tone is missing)
+- Our own controlled components: props `value` + `onChange` (ColorSwatches, TonePicker); the parent holds the state; `onChange={setTone}` passes the setter directly
+- `useState<ShowTone>('friendly')`: an explicit type so the state isn't widened to `string`
+- Form as derived values: `draft` (the trimmed form as one object) feeds the live preview, the validation and `addShow(draft)`
+- Validation: an `errors` object derived from state, `Object.values(errors).every(...)`, and a `submitted` flag so errors only show after the first submit; `error` + `helperText` on TextField; `noValidate` on the form turns off the browser's own bubbles
+- `useNavigate()` to navigate from code after saving (`Link` is for clicks)
+- A function that returns a value from the Context: `const id = addShow(draft)`
+- CSS Grid `repeat(auto-fit, minmax(240px, 1fr))`: picks the number of columns by width, no breakpoints
+- `minWidth: 0` lets long text wrap inside a flex child
+- `{show.description && ` · ${show.description}`}`: render a piece only when the value isn't empty
+- Reset demo data keys: `podcast-studio:episodes` and `podcast-studio:shows`
 
 ## What's done
 - Status pipeline: draft → scripted → recorded → published (`getNextStatus` in `utils/status.tsx`)
@@ -78,10 +100,11 @@ src/
 - Add-episode session (Sep 30, 2026): `addEpisode` in the Context, `AddEpisodeForm` on ShowPage (new episodes start as `draft`), title trimming and validation, "1 episode" pluralization in ShowCard
 - Product vision (Sep 30, 2026): the product is an "AI co-producer" for niche/business podcasts, not another audio generator. Full vision, roadmap (4 phases with gates), feature list and pricing hypothesis live in the Claude doc "Podcast Studio: Product Vision & Roadmap"
 - Sprint 1 of Phase 1 (Sep 30, 2026): episodes persist in localStorage, status config moved to `utils/status.tsx`, Pipeline Board (`/pipeline`) with PipelineCard, nav links in the AppBar
+- Show DNA session (Oct 1, 2026): Show type extended with audience, tone, hostPersona (+ `NewShow`); `utils/showOptions.ts`; shows persist in localStorage + `addShow`; ColorSwatches, TonePicker, ShowDna, ShowPreview; `/shows/new` form with validation and live preview; "New show" button on HomePage; Show DNA panel on ShowPage; empty description no longer shows a stray " · "
 
 ## Next up (Phase 1: live demo)
-- Show DNA: a form for a new show (title, niche, host, description, coverColor, audience, tone); persist shows in localStorage too
-- Deploy to Vercel so the demo has a real URL (gate for Phase 1: live URL + 3 people tried it)
+- Deploy to Vercel so the demo has a real URL (gate for Phase 1: live URL + 3 people tried it): `npm run build` clean, GitHub remote, `vercel.json` rewrite to `index.html` (BrowserRouter), turn on `"strict": true` in `tsconfig.app.json` (all current code already passes it)
+- Empty state on ShowPage: a new show lands on "Episodes (0)" with an empty bar; give it a friendly "Add your first episode" state
 - Episode Studio: a page per episode (script, notes, checklist)
 - Consistency Streak: weekly goal + publishing calendar
 - Mobile polish: ShowPage episode rows are cramped at phone width (title wraps into many lines)
@@ -89,7 +112,10 @@ src/
 ## Ideas for next steps
 - Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage); the ShowPage "→ next" button could use `statusConfig` label and color like PipelineCard does
 - Small polish: a blank line before `<AddEpisodeForm />` in ShowPage
-- Deleting or renaming an episode; an empty state ("No episodes yet") on ShowPage for a show with no episodes
+- Deleting or renaming an episode; editing or deleting a show (reuse the NewShowPage form)
+- Show DNA "forbidden words": deferred to Phase 3, when the AI actually reads the DNA
+- `loadEpisodes` and `loadShows` are near copies; if a third one appears, make a generic `loadFromStorage<T>(key, fallback)`
+- If the `Show` type changes again, shows already saved in localStorage won't have the new fields: either handle missing fields or reset with `localStorage.clear()`
 - Later phases (see the vision doc): backend + auth, AI Co-producer (scripts, Topic Radar, Repurpose Pack) via the server only, then Stripe, Public Show Page, Hebrew/English
 
 ## Working with Claude
@@ -100,3 +126,6 @@ src/
 - If localhost:5173 shows an error page, the dev server has stopped: Ctrl+C in terminal 1, then `npm run dev` again
 - `git add .` is fine here (`node_modules` and `.DS_Store` are in `.gitignore`); run `git status` first to see what goes in
 - Claude checks work by reading files and looking at the page in Chrome (localhost:5173), and does not run git commands in the project (they can leave a stale `.git/index.lock`)
+- Opening files with Cmd+P: type part of the folder too (`pages/ShowPage`, `components/ShowDna`), since several files share a name start; check the tab before editing
+- If a file got messed up before committing: `git restore <file>` brings back the last committed version
+- When something turns red, write "check" before committing, and Claude finds the cause
