@@ -3,6 +3,7 @@ import AppShell from './components/AppShell'
 import HomePage from './pages/HomePage'
 import ShowPage from './pages/ShowPage'
 import PipelinePage from './pages/PipelinePage'
+import NewShowPage from './pages/NewShowPage'
 import { PodcastProvider } from './context/PodcastContext'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AppShell />}>
             <Route index element={<HomePage />} />
+            <Route path="shows/new" element={<NewShowPage />} />
             <Route path="shows/:showId" element={<ShowPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
           </Route>
