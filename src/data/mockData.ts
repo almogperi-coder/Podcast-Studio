@@ -8,6 +8,9 @@ export const shows: Show[] = [
     host: 'Nigel',
     description: 'Tips for small gardens and balconies',
     coverColor: '#10B981',
+    audience: 'Apartment dwellers with a balcony or a small yard',
+    tone: 'calm',
+    hostPersona: 'A patient neighbor who learned gardening by trial and error',
   },
   {
     id: 's2',
@@ -16,6 +19,9 @@ export const shows: Show[] = [
     host: 'Maya',
     description: 'Learning web development step by step',
     coverColor: '#3B82F6',
+    audience: 'Career changers learning to code in the evenings',
+    tone: 'friendly',
+    hostPersona: 'A junior developer one step ahead, who explains without jargon',
   },
 ]
 
