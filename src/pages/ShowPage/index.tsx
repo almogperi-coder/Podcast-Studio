@@ -9,6 +9,7 @@ import ShowDna from '../../components/ShowDna'
 import EpisodesEmptyState from '../../components/EpisodesEmptyState'
 import { usePodcastContext } from '../../context/PodcastContext'
 import { getNextStatus } from '../../utils/status'
+import NotFound from '../../components/NotFound'
 
 
 export default function ShowPage() {
@@ -19,7 +20,12 @@ export default function ShowPage() {
   const showEpisodes = episodes.filter((e) => e.showId === showId)
 
   if (!show) {
-    return <Typography variant="h5">Show not found</Typography>
+    return (
+      <NotFound
+        title="Show not found"
+        message="Shows are saved in the browser they were created in, so a link from another device won't open them yet."
+      />
+    )
   }
 
   const publishedCount = showEpisodes.filter((e) => e.status === 'published').length

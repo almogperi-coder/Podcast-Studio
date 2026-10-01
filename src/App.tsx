@@ -5,6 +5,7 @@ import ShowPage from './pages/ShowPage'
 import PipelinePage from './pages/PipelinePage'
 import NewShowPage from './pages/NewShowPage'
 import { PodcastProvider } from './context/PodcastContext'
+import NotFound from './components/NotFound'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="shows/new" element={<NewShowPage />} />
             <Route path="shows/:showId" element={<ShowPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
+            <Route path="*" element={<NotFound title="Page not found" message="This page doesn't exist. Let's get you back to your shows." />} />
           </Route>
         </Routes>
       </BrowserRouter>
