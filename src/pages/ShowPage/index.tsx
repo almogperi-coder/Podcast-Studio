@@ -129,24 +129,24 @@ export default function ShowPage() {
                     <StatusChip status={episode.status} />
                     {nextStatus && (
                       <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
-                    >
-                      → {nextStatus}
-                    </Button>
-                  )}
-                </Stack>
-              </Paper>
-            )
-          })}
-        </Stack>
-      </>
-    ) : (
-      <EpisodesEmptyState color={show.coverColor} />
-    )}
+                        size="small"
+                        variant="contained"
+                        onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
+                      >
+                        → {nextStatus}
+                      </Button>
+                    )}
+                  </Stack>
+                </Paper>
+              )
+            })}
+          </Stack>
+        </>
+      ) : (
+        <EpisodesEmptyState color={show.coverColor} />
+      )}
 
-    <AddEpisodeForm showId={show.id} />
-  </>
-)
+<AddEpisodeForm showId={show.id} />
+    </>
+  )
 }
