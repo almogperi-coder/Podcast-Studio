@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router-dom'
 import StatusChip from '../../components/StatusChip'
 import AddEpisodeForm from '../../components/AddEpisodeForm'
 import ShowDna from '../../components/ShowDna'
+import EpisodesEmptyState from '../../components/EpisodesEmptyState'
 import { usePodcastContext } from '../../context/PodcastContext'
 import { getNextStatus } from '../../utils/status'
 
@@ -22,7 +23,8 @@ export default function ShowPage() {
   }
 
   const publishedCount = showEpisodes.filter((e) => e.status === 'published').length
-  const progress = showEpisodes.length === 0 ? 0 : (publishedCount / showEpisodes.length) * 100
+  const hasEpisodes = showEpisodes.length > 0
+  const progress = hasEpisodes ? (publishedCount / showEpisodes.length) * 100 : 0
 
   return (
     <>
@@ -79,65 +81,72 @@ export default function ShowPage() {
         <ShowDna show={show} />
       </Paper>
 
-      <Box sx={{ mt: 4 }}>
-        <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="h6">Episodes ({showEpisodes.length})</Typography>
-          <Typography color="text.secondary">
-            {publishedCount} of {showEpisodes.length} published
-          </Typography>
-        </Stack>
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{
-            height: 8,
-            borderRadius: '4px',
-            bgcolor: 'rgba(255, 255, 255, 0.08)',
-            '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: '4px' },
-          }}
-        />
-      </Box>
-
-      <Stack spacing={1.5} sx={{ mt: 3 }}>
-        {showEpisodes.map((episode) => {
-          const nextStatus = getNextStatus(episode.status)
-
-          return (
-            <Paper
-              key={episode.id}
-              variant="outlined"
+      {hasEpisodes ? (
+        <>
+          <Box sx={{ mt: 4 }}>
+            <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="h6">Episodes ({showEpisodes.length})</Typography>
+              <Typography color="text.secondary">
+                {publishedCount} of {showEpisodes.length} published
+              </Typography>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
               sx={{
-                p: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 2,
+                height: 8,
+                borderRadius: '4px',
+                bgcolor: 'rgba(255, 255, 255, 0.08)',
+                '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: '4px' },
               }}
-            >
-              <Box>
-                <Typography sx={{ fontWeight: 600 }}>{episode.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {episode.publishDate ?? 'Not published yet'}
-                </Typography>
-              </Box>
+            />
+          </Box>
 
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                <StatusChip status={episode.status} />
-                {nextStatus && (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
-                  >
-                    → {nextStatus}
-                  </Button>
-                )}
-              </Stack>
-            </Paper>
-          )
-        })}
-      </Stack>
-      <AddEpisodeForm showId={show.id} />
-    </>
-  )
+          <Stack spacing={1.5} sx={{ mt: 3 }}>
+            {showEpisodes.map((episode) => {
+              const nextStatus = getNextStatus(episode.status)
+
+              return (
+                <Paper
+                  key={episode.id}
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography sx={{ fontWeight: 600 }}>{episode.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {episode.publishDate ?? 'Not published yet'}
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <StatusChip status={episode.status} />
+                    {nextStatus && (
+                      <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
+                    >
+                      → {nextStatus}
+                    </Button>
+                  )}
+                </Stack>
+              </Paper>
+            )
+          })}
+        </Stack>
+      </>
+    ) : (
+      <EpisodesEmptyState color={show.coverColor} />
+    )}
+
+    <AddEpisodeForm showId={show.id} />
+  </>
+)
 }
