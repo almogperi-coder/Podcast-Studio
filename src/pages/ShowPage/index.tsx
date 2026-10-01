@@ -146,7 +146,7 @@ export default function ShowPage() {
         <EpisodesEmptyState color={show.coverColor} />
       )}
 
-<AddEpisodeForm showId={show.id} />
+      <AddEpisodeForm showId={show.id} />
     </>
   )
 }
