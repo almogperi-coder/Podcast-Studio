@@ -3,8 +3,11 @@
 A React + TypeScript practice project, built alongside the fullstack course (JB 45800-9).
 The idea is a management app for a "podcast factory": shows, episodes, and a pipeline of episode statuses.
 
+- Live demo: https://podcast-studio-beige.vercel.app (Vercel, Hobby plan)
+- Code: https://github.com/almogperi-coder/Podcast-Studio (public)
+
 ## Stack
-- Vite 8 + React 19 + TypeScript 6
+- Vite 8 + React 19 + TypeScript 6 (`"strict": true` in `tsconfig.app.json`; TS 6 is strict by default anyway, the line makes it explicit)
 - React Router 7 (`react-router-dom`)
 - MUI 9 (`@mui/material`, `@mui/icons-material`). In v9, system props like `alignItems` are passed through `sx`, not directly on the component.
 - Font: Plus Jakarta Sans (Google Fonts, loaded in `index.html`)
@@ -18,7 +21,8 @@ The idea is a management app for a "podcast factory": shows, episodes, and a pip
 
 ## Structure
 ```
-index.html                      Google Fonts link for Plus Jakarta Sans
+index.html                      Title, meta description, theme-color, Open Graph tags (link previews), Google Fonts link for Plus Jakarta Sans
+vercel.json                     Rewrite every path to /index.html so BrowserRouter URLs survive a refresh on Vercel
 src/
   theme.ts                      createTheme: dark mode, palette, borderRadius 16, typography
   types/podcast.ts              EpisodeStatus, ShowTone, Show (incl. coverColor + DNA: audience, tone, hostPersona), NewShow = Omit<Show, 'id'>, Episode
@@ -27,7 +31,9 @@ src/
   components/AddEpisodeForm/    Form under the episode list: controlled TextField + submit button, trims and validates the title
   components/AppShell/          Sticky glass AppBar (blur) + gradient logo + Container + <Outlet /> + NavLinks (Shows, Pipeline)
   components/ColorSwatches/     Round color buttons (ButtonBase) for coverColor; controlled (value + onChange), ring + check on the selected one
+  components/EpisodesEmptyState/ Dashed box in the show's color: mic icon, "Add your first episode", the 4 stages as StatusChips (arrows hidden on phones)
   components/Hero/              Home banner: radial "glow" background, gradient headline, live stats
+  components/NotFound/          Centered "not found" message (title + message props) with a "Back to all shows" button
   components/PipelineCard/      Board card: show dot + name in its coverColor (links to the show), title, "Move to <next>" button
   components/ShowCard/          Card with gradient cover in the show's coverColor, hover lift + glow, episode count
   components/ShowDna/           3 tiles (Audience, Tone, Host persona) in the show's color; auto-fit grid; "Not set yet" for empty values
@@ -36,11 +42,11 @@ src/
   components/TonePicker/        Clickable Chips per tone (selected = filled primary) + the selected tone's hint
   pages/HomePage/               Hero + "My Shows" header with a "New show" button + responsive Grid of ShowCards
   pages/NewShowPage/            /shows/new: Basics + Show DNA form (validation after first submit) + live ShowPreview; saves and navigates to the new show
-  pages/ShowPage/               Back button, show banner, Show DNA panel, published progress bar, episodes as Paper rows, "Next status" button, AddEpisodeForm
+  pages/ShowPage/               Back button, show banner, Show DNA panel, then either episodes (header, progress bar, Paper rows, "Next status" button) or EpisodesEmptyState, then AddEpisodeForm; NotFound for an unknown id
   pages/PipelinePage/           Kanban: a column per status (colored top border, icon, count), PipelineCards, empty state
   utils/showOptions.ts          toneConfig (label, hint), toneOrder, coverColors (8 swatches)
   utils/status.tsx              Single source of truth: statusConfig (label, color, icon), statusOrder, getNextStatus
-  App.tsx                       PodcastProvider > BrowserRouter > Routes
+  App.tsx                       PodcastProvider > BrowserRouter > Routes (incl. a `*` catch-all to NotFound)
   main.tsx                      ThemeProvider > CssBaseline + App
 ```
 
@@ -49,6 +55,7 @@ src/
 - `/shows/new`: NewShowPage (a static path wins over `:showId`, so `new` is never read as an id)
 - `/shows/:showId`: ShowPage ("Show not found" if the id doesn't exist)
 - `/pipeline`: PipelinePage
+- `*`: NotFound ("Page not found"), inside AppShell so the AppBar stays
 
 ## Design system
 - Background `#0B0B14`, paper `#151524`
@@ -92,6 +99,11 @@ src/
 - `minWidth: 0` lets long text wrap inside a flex child
 - `{show.description && ` · ${show.description}`}`: render a piece only when the value isn't empty
 - Reset demo data keys: `podcast-studio:episodes` and `podcast-studio:shows`
+- Conditional block: `{hasEpisodes ? (<>...</>) : (<EpisodesEmptyState />)}`; a Fragment wraps two siblings in one branch
+- `<Fragment key={...}>` (full name) when a `map` returns two siblings; the short `<>` can't take a key
+- Hide on phones only: `display: { xs: 'none', sm: 'block' }`
+- One component, several uses through props (`NotFound` with `title` + `message`)
+- `<Route path="*">` catches every URL no other route matched
 
 ## What's done
 - Status pipeline: draft → scripted → recorded → published (`getNextStatus` in `utils/status.tsx`)
@@ -100,16 +112,20 @@ src/
 - Add-episode session (Sep 30, 2026): `addEpisode` in the Context, `AddEpisodeForm` on ShowPage (new episodes start as `draft`), title trimming and validation, "1 episode" pluralization in ShowCard
 - Product vision (Sep 30, 2026): the product is an "AI co-producer" for niche/business podcasts, not another audio generator. Full vision, roadmap (4 phases with gates), feature list and pricing hypothesis live in the Claude doc "Podcast Studio: Product Vision & Roadmap"
 - Sprint 1 of Phase 1 (Sep 30, 2026): episodes persist in localStorage, status config moved to `utils/status.tsx`, Pipeline Board (`/pipeline`) with PipelineCard, nav links in the AppBar
+- Deploy session (Oct 2, 2026): EpisodesEmptyState on ShowPage (no "0 of 0" or empty bar), `"strict": true`, clean `npm run build`, page title + meta/Open Graph tags, NotFound for unknown shows and routes, `vercel.json` rewrite, GitHub remote + first push, Vercel project (auto-deploy on every push to `main`). Checked live: `/pipeline`, `/shows/s1` and `/blabla` all load directly
 - Show DNA session (Oct 1, 2026): Show type extended with audience, tone, hostPersona (+ `NewShow`); `utils/showOptions.ts`; shows persist in localStorage + `addShow`; ColorSwatches, TonePicker, ShowDna, ShowPreview; `/shows/new` form with validation and live preview; "New show" button on HomePage; Show DNA panel on ShowPage; empty description no longer shows a stray " · "
 
 ## Next up (Phase 1: live demo)
-- Deploy to Vercel so the demo has a real URL (gate for Phase 1: live URL + 3 people tried it): `npm run build` clean, GitHub remote, `vercel.json` rewrite to `index.html` (BrowserRouter), turn on `"strict": true` in `tsconfig.app.json` (all current code already passes it)
-- Empty state on ShowPage: a new show lands on "Episodes (0)" with an empty bar; give it a friendly "Add your first episode" state
+- Phase 1 gate, second half: 3 people try the live URL (one from the course, one non-technical, one small-business owner or creator); collect what confused them
 - Episode Studio: a page per episode (script, notes, checklist)
 - Consistency Streak: weekly goal + publishing calendar
 - Mobile polish: ShowPage episode rows are cramped at phone width (title wraps into many lines)
 
 ## Ideas for next steps
+- Bundle is one 519 kB JS file (163 kB gzipped), so `vite build` warns about chunks over 500 kB; fine for the demo, later split routes with `React.lazy` + dynamic `import()`
+- Replace the default Vite `favicon.svg` with a Podcast Studio icon; add an `og:image` for nicer link previews
+- Data lives in each visitor's localStorage: a link to a show someone created won't open on another device (the NotFound message says so) until the Phase 2 backend
+- Vercel Hobby is for non-commercial use; move to Pro before the paid beta (Phase 4)
 - Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage); the ShowPage "→ next" button could use `statusConfig` label and color like PipelineCard does
 - Small polish: a blank line before `<AddEpisodeForm />` in ShowPage
 - Deleting or renaming an episode; editing or deleting a show (reuse the NewShowPage form)
@@ -128,4 +144,9 @@ src/
 - Claude checks work by reading files and looking at the page in Chrome (localhost:5173), and does not run git commands in the project (they can leave a stale `.git/index.lock`)
 - Opening files with Cmd+P: type part of the folder too (`pages/ShowPage`, `components/ShowDna`), since several files share a name start; check the tab before editing
 - If a file got messed up before committing: `git restore <file>` brings back the last committed version
+- Editor is Cursor (built on VS Code, same shortcuts). Tab also accepts Cursor's grey AI suggestions, so indent selected lines with Cmd+] (and outdent with Cmd+[) instead of Tab
+- Copying long code blocks from the chat can get cut off at the end: after pasting, scroll to the bottom and check the last line; for big changes, Claude can write the file directly and Almog reviews and commits
+- Cursor re-indents pasted blocks; the status bar's `Col` shows the cursor column (Col = spaces + 1), handy for fixing indentation
+- Don't run `npx` commands from websites (e.g. Vercel's "Onboard your coding agent") without knowing what they change
+- Deploy flow: commit → `git push` → Vercel builds and publishes automatically; a failed build keeps the previous version live
 - When something turns red, write "check" before committing, and Claude finds the cause
