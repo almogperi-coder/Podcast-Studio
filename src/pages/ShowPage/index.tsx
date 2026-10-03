@@ -68,12 +68,15 @@ export default function ShowPage() {
             size="small"
             sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', fontWeight: 600 }}
           />
-          <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }, lineHeight: 1.15 }}
+          >
             {show.title}
           </Typography>
           <Typography sx={{ opacity: 0.85 }}>
-          Hosted by {show.host}
-          {show.description && ` · ${show.description}`}
+            Hosted by {show.host}
+            {show.description && ` · ${show.description}`}
           </Typography>
         </Box>
       </Box>
