@@ -117,13 +117,12 @@ src/
 - Sprint 1 of Phase 1 (Sep 30, 2026): episodes persist in localStorage, status config moved to `utils/status.tsx`, Pipeline Board (`/pipeline`) with PipelineCard, nav links in the AppBar
 - Deploy session (Oct 2, 2026): EpisodesEmptyState on ShowPage (no "0 of 0" or empty bar), `"strict": true`, clean `npm run build`, page title + meta/Open Graph tags, NotFound for unknown shows and routes, `vercel.json` rewrite, GitHub remote + first push, Vercel project (auto-deploy on every push to `main`). Checked live: `/pipeline`, `/shows/s1` and `/blabla` all load directly
 - Show DNA session (Oct 1, 2026): Show type extended with audience, tone, hostPersona (+ `NewShow`); `utils/showOptions.ts`; shows persist in localStorage + `addShow`; ColorSwatches, TonePicker, ShowDna, ShowPreview; `/shows/new` form with validation and live preview; "New show" button on HomePage; Show DNA panel on ShowPage; empty description no longer shows a stray " · "
-- Mobile polish session (Oct 3, 2026): `EpisodeRow` extracted from ShowPage; on phones the row stacks (title full width, chip + button on their own line), status-colored left stripe, "Move to <next>" button from `statusConfig` (same as PipelineCard), "Published <date>". Also added `VISION.md` (vision moved from the Claude doc; now the source of truth) and `HANDOFF.md` (handoff between Claude and Codex: proposals, approved decisions, done + checked)
+- Mobile polish session (Oct 3, 2026): `EpisodeRow` extracted from ShowPage; on phones the row stacks (title full width, chip + button on their own line), status-colored left stripe, "Move to <next>" button from `statusConfig` (same as PipelineCard), "Published <date>"; the ShowPage title is responsive (`fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }`, `lineHeight: 1.15`). Also added `VISION.md` (vision moved from the Claude doc; now the source of truth) and `HANDOFF.md` (handoff between Claude and Codex: proposals, approved decisions, done + checked)
 
 ## Next up (Phase 1: live demo)
 - Phase 1 gate, second half: 3 people try the live URL (one from the course, one non-technical, one small-business owner or creator); collect what confused them. Status (Oct 3): 4 people tried it and gave positive feedback; still to collect who each tester is and their detailed comments, so the gate isn't marked done yet
 - Episode Studio: a page per episode (script, notes, checklist)
 - Consistency Streak: weekly goal + publishing calendar
-- Mobile polish: episode rows done (`EpisodeRow`); still left: the show title in the ShowPage banner (`h3`) is huge and wraps on phones
 
 ## Ideas for next steps
 - Bundle is one 519 kB JS file (163 kB gzipped), so `vite build` warns about chunks over 500 kB; fine for the demo, later split routes with `React.lazy` + dynamic `import()`
@@ -150,6 +149,7 @@ src/
 - If a file got messed up before committing: `git restore <file>` brings back the last committed version
 - Editor is Cursor (built on VS Code, same shortcuts). Tab also accepts Cursor's grey AI suggestions, so indent selected lines with Cmd+] (and outdent with Cmd+[) instead of Tab
 - Copying long code blocks from the chat can get cut off at the end: after pasting, scroll to the bottom and check the last line; for big changes, Claude can write the file directly and Almog reviews and commits
+- Option+Shift+F (Format Document) fixes indentation after a paste, but it touches the whole file: write "check" afterwards to see what changed
 - Cursor re-indents pasted blocks; the status bar's `Col` shows the cursor column (Col = spaces + 1), handy for fixing indentation
 - Don't run `npx` commands from websites (e.g. Vercel's "Onboard your coding agent") without knowing what they change
 - Deploy flow: commit → `git push` → Vercel builds and publishes automatically; a failed build keeps the previous version live
