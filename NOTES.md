@@ -31,6 +31,7 @@ src/
   components/AddEpisodeForm/    Form under the episode list: controlled TextField + submit button, trims and validates the title
   components/AppShell/          Sticky glass AppBar (blur) + gradient logo + Container + <Outlet /> + NavLinks (Shows, Pipeline)
   components/ColorSwatches/     Round color buttons (ButtonBase) for coverColor; controlled (value + onChange), ring + check on the selected one
+  components/EpisodeRow/        One episode row on ShowPage: title + date, StatusChip, "Move to <next>" button in the next status's color, 4px left stripe in the current status color; stacks on phones (column on xs, row from sm)
   components/EpisodesEmptyState/ Dashed box in the show's color: mic icon, "Add your first episode", the 4 stages as StatusChips (arrows hidden on phones)
   components/Hero/              Home banner: radial "glow" background, gradient headline, live stats
   components/NotFound/          Centered "not found" message (title + message props) with a "Back to all shows" button
@@ -42,7 +43,7 @@ src/
   components/TonePicker/        Clickable Chips per tone (selected = filled primary) + the selected tone's hint
   pages/HomePage/               Hero + "My Shows" header with a "New show" button + responsive Grid of ShowCards
   pages/NewShowPage/            /shows/new: Basics + Show DNA form (validation after first submit) + live ShowPreview; saves and navigates to the new show
-  pages/ShowPage/               Back button, show banner, Show DNA panel, then either episodes (header, progress bar, Paper rows, "Next status" button) or EpisodesEmptyState, then AddEpisodeForm; NotFound for an unknown id
+  pages/ShowPage/               Back button, show banner, Show DNA panel, then either episodes (header, progress bar, an EpisodeRow per episode) or EpisodesEmptyState, then AddEpisodeForm; NotFound for an unknown id
   pages/PipelinePage/           Kanban: a column per status (colored top border, icon, count), PipelineCards, empty state
   utils/showOptions.ts          toneConfig (label, hint), toneOrder, coverColors (8 swatches)
   utils/status.tsx              Single source of truth: statusConfig (label, color, icon), statusOrder, getNextStatus
@@ -104,6 +105,8 @@ src/
 - Hide on phones only: `display: { xs: 'none', sm: 'block' }`
 - One component, several uses through props (`NotFound` with `title` + `message`)
 - `<Route path="*">` catches every URL no other route matched
+- `map` with an implicit return: `.map((episode) => (<EpisodeRow ... />))`; the `key` goes on the outer element the `map` returns
+- Responsive layout direction: `flexDirection: { xs: 'column', sm: 'row' }` + `alignItems: { xs: 'stretch', sm: 'center' }`
 
 ## What's done
 - Status pipeline: draft → scripted → recorded → published (`getNextStatus` in `utils/status.tsx`)
@@ -114,19 +117,20 @@ src/
 - Sprint 1 of Phase 1 (Sep 30, 2026): episodes persist in localStorage, status config moved to `utils/status.tsx`, Pipeline Board (`/pipeline`) with PipelineCard, nav links in the AppBar
 - Deploy session (Oct 2, 2026): EpisodesEmptyState on ShowPage (no "0 of 0" or empty bar), `"strict": true`, clean `npm run build`, page title + meta/Open Graph tags, NotFound for unknown shows and routes, `vercel.json` rewrite, GitHub remote + first push, Vercel project (auto-deploy on every push to `main`). Checked live: `/pipeline`, `/shows/s1` and `/blabla` all load directly
 - Show DNA session (Oct 1, 2026): Show type extended with audience, tone, hostPersona (+ `NewShow`); `utils/showOptions.ts`; shows persist in localStorage + `addShow`; ColorSwatches, TonePicker, ShowDna, ShowPreview; `/shows/new` form with validation and live preview; "New show" button on HomePage; Show DNA panel on ShowPage; empty description no longer shows a stray " · "
+- Mobile polish session (Oct 3, 2026): `EpisodeRow` extracted from ShowPage; on phones the row stacks (title full width, chip + button on their own line), status-colored left stripe, "Move to <next>" button from `statusConfig` (same as PipelineCard), "Published <date>". Also added `VISION.md` (vision moved from the Claude doc; now the source of truth) and `HANDOFF.md` (handoff between Claude and Codex: proposals, approved decisions, done + checked)
 
 ## Next up (Phase 1: live demo)
-- Phase 1 gate, second half: 3 people try the live URL (one from the course, one non-technical, one small-business owner or creator); collect what confused them
+- Phase 1 gate, second half: 3 people try the live URL (one from the course, one non-technical, one small-business owner or creator); collect what confused them. Status (Oct 3): 4 people tried it and gave positive feedback; still to collect who each tester is and their detailed comments, so the gate isn't marked done yet
 - Episode Studio: a page per episode (script, notes, checklist)
 - Consistency Streak: weekly goal + publishing calendar
-- Mobile polish: ShowPage episode rows are cramped at phone width (title wraps into many lines)
+- Mobile polish: episode rows done (`EpisodeRow`); still left: the show title in the ShowPage banner (`h3`) is huge and wraps on phones
 
 ## Ideas for next steps
 - Bundle is one 519 kB JS file (163 kB gzipped), so `vite build` warns about chunks over 500 kB; fine for the demo, later split routes with `React.lazy` + dynamic `import()`
 - Replace the default Vite `favicon.svg` with a Podcast Studio icon; add an `og:image` for nicer link previews
 - Data lives in each visitor's localStorage: a link to a show someone created won't open on another device (the NotFound message says so) until the Phase 2 backend
 - Vercel Hobby is for non-commercial use; move to Pro before the paid beta (Phase 4)
-- Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage); the ShowPage "→ next" button could use `statusConfig` label and color like PipelineCard does
+- Design cleanup: move repeated colors into the theme (the brand gradient is duplicated in AppShell and Hero; `#151524` is hardcoded in ShowCard and ShowPage)
 - Small polish: a blank line before `<AddEpisodeForm />` in ShowPage
 - Deleting or renaming an episode; editing or deleting a show (reuse the NewShowPage form)
 - Show DNA "forbidden words": deferred to Phase 3, when the AI actually reads the DNA
