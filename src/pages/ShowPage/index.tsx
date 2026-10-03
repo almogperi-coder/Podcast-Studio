@@ -3,17 +3,16 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PodcastsIcon from '@mui/icons-material/Podcasts'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { Link, useParams } from 'react-router-dom'
-import StatusChip from '../../components/StatusChip'
+import EpisodeRow from '../../components/EpisodeRow'
 import AddEpisodeForm from '../../components/AddEpisodeForm'
 import ShowDna from '../../components/ShowDna'
 import EpisodesEmptyState from '../../components/EpisodesEmptyState'
 import { usePodcastContext } from '../../context/PodcastContext'
-import { getNextStatus } from '../../utils/status'
 import NotFound from '../../components/NotFound'
 
 
 export default function ShowPage() {
-  const { shows, episodes, updateEpisodeStatus } = usePodcastContext()
+  const { shows, episodes } = usePodcastContext()
   const { showId } = useParams()
 
   const show = shows.find((s) => s.id === showId)
@@ -109,43 +108,9 @@ export default function ShowPage() {
           </Box>
 
           <Stack spacing={1.5} sx={{ mt: 3 }}>
-            {showEpisodes.map((episode) => {
-              const nextStatus = getNextStatus(episode.status)
-
-              return (
-                <Paper
-                  key={episode.id}
-                  variant="outlined"
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 2,
-                  }}
-                >
-                  <Box>
-                    <Typography sx={{ fontWeight: 600 }}>{episode.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {episode.publishDate ?? 'Not published yet'}
-                    </Typography>
-                  </Box>
-
-                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                    <StatusChip status={episode.status} />
-                    {nextStatus && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => updateEpisodeStatus(episode.id, nextStatus)}
-                      >
-                        → {nextStatus}
-                      </Button>
-                    )}
-                  </Stack>
-                </Paper>
-              )
-            })}
+            {showEpisodes.map((episode) => (
+              <EpisodeRow key={episode.id} episode={episode} />
+            ))}
           </Stack>
         </>
       ) : (
