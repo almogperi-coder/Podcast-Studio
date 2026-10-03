@@ -134,7 +134,7 @@ src/
 - If the `Show` type changes again, shows already saved in localStorage won't have the new fields: either handle missing fields or reset with `localStorage.clear()`
 - Later phases (see the vision doc): backend + auth, AI Co-producer (scripts, Topic Radar, Repurpose Pack) via the server only, then Stripe, Public Show Page, Hebrew/English
 
-## Working with Claude
+## Working with AI assistants
 - The dev server runs in its own terminal (`npm run dev`, port 5173); git and everything else run in a second terminal
 - Almog types the code himself, step by step, with an explanation for every part
 - Instructions go click by click (Cmd+P to open a file, Ctrl+G to jump to a line), editing from the bottom of the file up so line numbers don't shift, with an explanation table and commit commands at the end of every step
